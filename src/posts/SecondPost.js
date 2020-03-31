@@ -7,7 +7,6 @@ import Header from '../sharedelements/Header';
 import Main from '../sharedelements/Main';
 import Footer from '../sharedelements/Footer';
 import { Link } from "react-router-dom";
-import GoogleMapReact from 'google-map-react';
 
 const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
@@ -16,9 +15,6 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(3),
   },
 }));
-
-const center =  { lat: 59.95, lng: 30.33 }
-const zoom =  11
 
 export default function Post() {
   const classes = useStyles();
@@ -29,19 +25,6 @@ export default function Post() {
       <Container maxWidth="lg">
         <Header title="Datahose" />
         <main>
-        <div style={{ height: '100vh', width: '100%' }}>
-                <GoogleMapReact
-                  bootstrapURLKeys={{ key: /* YOUR KEY HERE */ }}
-                  defaultCenter={center}
-                  defaultZoom={zoom}
-                >
-                  <AnyReactComponent
-                    lat={59.955413}
-                    lng={30.337844}
-                    text="My Marker"
-                  />
-                </GoogleMapReact>
-              </div>
         </main>
       </Container>
       <Footer title="Footer" description="Something here to give the footer a purpose!" />
