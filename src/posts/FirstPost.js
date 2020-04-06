@@ -31,14 +31,14 @@ var style = new Style({
     })
 });
 
-// add some example marker
+// Build markers
 const bmz_markers = [];
 bmz.forEach(
     function(obj) {
         var _marker = new Feature({
             geometry : new geom.Circle(
                 proj.fromLonLat([obj.latitude, obj.longitude]),
-                obj.budget/1000
+                obj.budget/500
             ),
         });
         _marker.setStyle(style);
@@ -57,17 +57,61 @@ const mainFeaturedPost = {
   linkText: 'Continue reading…',
 };
 
+/// Extract unique values for selection
+const extractCountries = (json) => {
+    const uniqueTags = [];
+    json.map(obj => {
+        if (uniqueTags.indexOf(obj.recipient_country) === -1) {
+            uniqueTags.push(obj.recipient_country)
+        }
+    });
+    return uniqueTags.sort()
+}
+
+/// Build markers
+const buildMarkers = (json, filter_dict) => {
+
+    // setup marker array
+    var bmz_markers = [];
+
+    // filter json using filterdict
+    for (let key in filter_dict){
+        var json = json.filter(_obj=>
+            _obj[key]==filter_dict[key]
+        )
+    }
+    console.log(json);
+    // create markers
+    json.map((obj) => {
+        var _marker = new Feature({
+            geometry : new geom.Circle(
+                proj.fromLonLat([obj.latitude, obj.longitude]),
+                obj.budget/1000
+            ),
+        });
+        bmz_markers.push(_marker)
+    });
+
+    return bmz_markers
+}
+
 function Post(props) {
 
     const classes = useStyles();
     const { setView } = props;
+    const [filterDict, setFilterDict] = React.useState({});
+    console.log("Filter Dict", filterDict);
 
     return (
         <React.Fragment>
             <CssBaseline />
             <Container maxWidth="lg">
                     <main>
-                        <OlMap points={ bmz_markers.splice(1, 6000) } />
+                        <OlMap
+                            points={ buildMarkers(bmz, filterDict) }
+                            setFilterDict={ setFilterDict }
+                            uniqueCountries={extractCountries(bmz)}
+                        />
                     </main>
             </Container>
         </React.Fragment>

@@ -1,6 +1,10 @@
 import React, { useState, Component } from "react";
 import Map from 'ol/Map';
 import Slider from '@material-ui/core/Slider';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import Feature from 'ol/Feature';
@@ -25,8 +29,9 @@ class OlMap extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: [0,100]
+            value: [0,100],
         }
+
         this.map = new Map({
             target: null,
             layers: [
@@ -47,14 +52,28 @@ class OlMap extends Component {
 
         this.setValue = this.setValue.bind(this)
         this.handleChange = this.handleChange.bind(this)
+        this.handleCountryChange = this.handleCountryChange.bind(this)
+        this.updateMap = this.updateMap.bind(this)
     }
 
-    componentDidMount() {
-        this.map.setTarget("map");
-    }
-
-    componentWillUnmount() {
-        this.map.setTarget(null);
+    updateMap() {
+        this.map = new Map({
+            target: "map",
+            layers: [
+                new TileLayer({
+                    source: new SourceOSM()
+                }),
+                new LayerVector({
+                    source: new SourceVector({
+                        features: this.props.points
+                    })
+                })
+            ],
+            view: new View({
+                center: posBerlin,
+                zoom: 2
+            })
+        });
     }
 
     setValue(newValue) {
@@ -63,6 +82,27 @@ class OlMap extends Component {
 
     handleChange = (event, newValue) => {
         this.setValue(newValue)
+    }
+
+    handleCountryChange = (event) => {
+        this.props.setFilterDict({"recipient_country":event.target.value})
+    }
+
+    // Mounting stuff
+    componentDidMount() {
+        this.map.setTarget("map");
+    }
+
+    componentWillUnmount() {
+        this.map.setTarget(null);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.points != prevProps.points) {
+            this.map.setTarget(null);
+            this.updateMap();
+            this.map.setTarget("map");
+        }
     }
 
     render() {
@@ -81,6 +121,23 @@ class OlMap extends Component {
                     getAriaValueText={valuetext}
                     marks={true}
                 />
+
+                <Typography variant="h6" gutterBottom>
+                Select some other shit
+                </Typography>
+                <FormControl>
+                    <InputLabel id="demo-simple-select-label">Select Country</InputLabel>
+                    <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={50}
+                        onChange={this.handleCountryChange}
+                    >
+                        {this.props.uniqueCountries.map((item) =>
+                            <MenuItem value={item}>{item}</MenuItem>
+                        )}
+                   </Select>
+                </FormControl>
              </div>
         );
     }
