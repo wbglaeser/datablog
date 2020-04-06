@@ -38,7 +38,7 @@ bmz.forEach(
         var _marker = new Feature({
             geometry : new geom.Circle(
                 proj.fromLonLat([obj.latitude, obj.longitude]),
-                obj.budget/3000
+                obj.budget/1000
             ),
         });
         _marker.setStyle(style);
