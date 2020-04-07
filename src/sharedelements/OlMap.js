@@ -29,7 +29,10 @@ class OlMap extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: [0,100],
+            value: [
+                this.props.rangeBudget["lower_bound"],
+                this.props.rangeBudget["upper_bound"]
+            ],
         }
 
         this.map = new Map({
@@ -51,7 +54,7 @@ class OlMap extends Component {
         });
 
         this.setValue = this.setValue.bind(this)
-        this.handleChange = this.handleChange.bind(this)
+        this.handleSliderChange = this.handleSliderChange.bind(this)
         this.handleCountryChange = this.handleCountryChange.bind(this)
         this.updateMap = this.updateMap.bind(this)
     }
@@ -80,12 +83,22 @@ class OlMap extends Component {
         this.setState({value: newValue})
     }
 
-    handleChange = (event, newValue) => {
-        this.setValue(newValue)
+    handleSliderChange = (event, newValue) => {
+        const newDict = {...this.props.filter_dict};
+        newDict["budget"] = {};
+        newDict["budget"]["type"]="range";
+        newDict["budget"]["lower_bound"]=newValue[0]
+        newDict["budget"]["upper_bound"]=newValue[1]
+        this.setValue(newValue);
+        this.props.setFilterDict(newDict);
     }
 
     handleCountryChange = (event) => {
-        this.props.setFilterDict({"recipient_country":event.target.value})
+        const newDict = {...this.props.filter_dict};
+        newDict["recipient_country"] = {};
+        newDict["recipient_country"]["type"]="value";
+        newDict["recipient_country"]["value"]=event.target.value;
+        this.props.setFilterDict(newDict)
     }
 
     // Mounting stuff
@@ -111,19 +124,20 @@ class OlMap extends Component {
                 <div id="map" className="map" style={{ width: "100%", height: "600px" }}/>
 
                 <Typography variant="h6" gutterBottom>
-                Set Range for Budget Size
+                Set Range for Budget Size in Mio.
                 </Typography>
                 <Slider
                     value={this.state.value}
-                    onChange={this.handleChange}
+                    onChange={this.handleSliderChange}
                     valueLabelDisplay="auto"
                     aria-labelledby="range-slider"
                     getAriaValueText={valuetext}
-                    marks={true}
+                    min={this.props.rangeBudget["lower_bound"]}
+                    max={this.props.rangeBudget["upper_bound"]}
                 />
 
                 <Typography variant="h6" gutterBottom>
-                Select some other shit
+                Select Country
                 </Typography>
                 <FormControl>
                     <InputLabel id="demo-simple-select-label">Select Country</InputLabel>

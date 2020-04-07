@@ -46,41 +46,70 @@ bmz.forEach(
     }
 );
 
-console.log(bmz_markers);
+/// Extract range for slide
+const extractBudgetRange = (json) => {
 
-const mainFeaturedPost = {
-  title: 'BMZ Project Database',
-  description:
-    "Map displaying bmz projects.",
-  image: 'https://source.unsplash.com/random',
-  imgText: 'main image description',
-  linkText: 'Continue reading…',
-};
+    const budgetRange = {};
+    var arr = json.map(obj=>{
+        if (obj["budget"] != -9999 ) {
+            return obj["budget"]/1000000
+        }
+        else {return 0}
+    });
+    console.log(arr);
+    budgetRange["lower_bound"] = Math.min(...arr);
+    budgetRange["upper_bound"] = Math.max(...arr);
+    console.log(budgetRange);
+    return budgetRange
+}
+const budgetRange = extractBudgetRange(bmz);
 
 /// Extract unique values for selection
 const extractCountries = (json) => {
+
     const uniqueTags = [];
     json.map(obj => {
         if (uniqueTags.indexOf(obj.recipient_country) === -1) {
             uniqueTags.push(obj.recipient_country)
         }
     });
+
     return uniqueTags.sort()
+}
+const uniqueCountries = extractCountries(bmz);
+
+// apply filter to datasource
+const filter_json = (json, filter_dict) => {
+
+    for (let key in filter_dict) {
+
+        if (filter_dict[key]["type"] == "range") {
+            var json = json.filter(obj=>
+                (obj[key]/1000000>=filter_dict[key]["lower_bound"]) &
+                (obj[key]/1000000<=filter_dict[key]["upper_bound"])
+            )
+        }
+        else if (filter_dict[key]["type"] == "value") {
+            console.log("this went rhough");
+            var json = json.filter(obj=>
+                obj[key]==filter_dict[key]["value"])
+        }
+    }
+
+    return json
 }
 
 /// Build markers
 const buildMarkers = (json, filter_dict) => {
 
+    console.log("Current filter dict:", filter_dict);
+
     // setup marker array
     var bmz_markers = [];
 
     // filter json using filterdict
-    for (let key in filter_dict){
-        var json = json.filter(_obj=>
-            _obj[key]==filter_dict[key]
-        )
-    }
-    console.log(json);
+    var json = filter_json(json, filter_dict)
+
     // create markers
     json.map((obj) => {
         var _marker = new Feature({
@@ -91,7 +120,7 @@ const buildMarkers = (json, filter_dict) => {
         });
         bmz_markers.push(_marker)
     });
-
+    console.log("this function ran");
     return bmz_markers
 }
 
@@ -109,8 +138,10 @@ function Post(props) {
                     <main>
                         <OlMap
                             points={ buildMarkers(bmz, filterDict) }
+                            filter_dict={ filterDict }
                             setFilterDict={ setFilterDict }
-                            uniqueCountries={extractCountries(bmz)}
+                            uniqueCountries={ uniqueCountries }
+                            rangeBudget={ budgetRange }
                         />
                     </main>
             </Container>
