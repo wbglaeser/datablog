@@ -9,6 +9,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Hidden from '@material-ui/core/Hidden';
 
+
 const useStyles = makeStyles({
   card: {
     display: 'flex',
@@ -23,10 +24,10 @@ const useStyles = makeStyles({
 
 export default function FeaturedPost(props) {
   const classes = useStyles();
-  const { post } = props;
+  const { post, setView } = props;
 
   return (
-    <Grid item xs={12} md={6}>
+    <Grid item xs={12} md={6} onClick={() => setView("second")}>
       <CardActionArea component="a" href="#">
         <Card className={classes.card}>
           <div className={classes.cardDetails}>

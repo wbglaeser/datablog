@@ -11,7 +11,7 @@ import Footer from '../sharedelements/Footer';
 import { Link, withRouter } from "react-router-dom";
 
 import { Post as FirstPost } from '../posts/FirstPost';
-import { PostDetails as secondPost, Post as SecondPost } from '../posts/SecondPost';
+import { Post as SecondPost } from '../posts/SecondPost';
 import { PostDetails as thirdPost, Post as ThirdPost } from '../posts/ThirdPost';
 
 const useStyles = makeStyles(theme => ({
@@ -24,6 +24,15 @@ const mainFeaturedPost = {
   title: 'BMZ Project Database',
   description:
     "Map displaying bmz projects.",
+  image: 'https://source.unsplash.com/random',
+  imgText: 'main image description',
+  linkText: 'Continue reading…',
+};
+
+const secondPost = {
+  title: 'Title of a longer featured blog post',
+  description:
+    "Multiple lines of text that form the lede, informing new readers quickly and efficiently about what's most interesting in this post's contents.",
   image: 'https://source.unsplash.com/random',
   imgText: 'main image description',
   linkText: 'Continue reading…',
@@ -43,7 +52,7 @@ function Blog(props) {
                         <MainFeaturedPost className={classes.mainFeaturedPost} post={mainFeaturedPost} setView={setView} />
                         <Grid container spacing={4}>
                             {featuredPosts.map(post => (
-                                <FeaturedPost key={post.title} post={post} />
+                                <FeaturedPost key={post.title} post={post} setView={setView} />
                             ))}
                         </Grid>
                     </main>
