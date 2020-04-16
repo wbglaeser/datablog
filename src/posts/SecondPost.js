@@ -7,22 +7,29 @@ import Header from '../sharedelements/Header';
 import Main from '../sharedelements/Main';
 import Footer from '../sharedelements/Footer';
 import { Link } from "react-router-dom";
-import corona from '../data/corona/merged_data.json';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import Typography from '@material-ui/core/Typography';
+
+// Custom data VIZ
+import ValueCard from "../sharedelements/ValueCards.js";
 import LChart from "../sharedelements/LineCharts.js";
 
-console.log(corona);
+/// Load data
+import dynamic_state_data from '../data/corona/merged_data.json';
+import static_state_data from '../data/corona/states_static.json';
 
+/// Styling
 const useStyles = makeStyles(theme => ({
   mainGrid: {
     marginTop: theme.spacing(3),
   },
 }));
 
+
+/// Auxilliary functions for data import
 const filter_date = (data, date) => {
     var cut_off = Date.parse(date);
     var data = data.filter(obj=>
@@ -30,17 +37,26 @@ const filter_date = (data, date) => {
     )
     return data
 }
-const corona_cut = filter_date(corona, "2020-03-01");
+const dynamic_state_data_cut = filter_date(dynamic_state_data, "2020-03-01");
 
-const filter_corona = (data, current_state) => {
+const filter_state = (data, current_state) => {
     var data = data.filter(obj=>
         obj.state == current_state
     )
     return data
 }
-const data = filter_corona(corona_cut, "Brandenburg");
+const dynamic_state_data_filtered = filter_state(dynamic_state_data_cut, "Brandenburg");
 
-/// Extract unique state for selection
+const filter_state_static = (data, current_state) => {
+    var data = data.filter(obj=>
+        obj.state == current_state
+    )
+    return data[0]
+}
+const static_state_data_filtered = filter_state_static(static_state_data, "Brandenburg")
+console.log(static_state_data_filtered);
+
+/// Extract unique states for selection
 const extractStates = (json) => {
     const uniqueTags = [];
     json.map(obj => {
@@ -50,8 +66,7 @@ const extractStates = (json) => {
     });
     return uniqueTags.sort()
 }
-const uniqueStates = extractStates(corona);
-
+const uniqueStates = extractStates(dynamic_state_data);
 
 const mpost_details = [
     {
@@ -104,7 +119,8 @@ class Post extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: data,
+            dynamic_data: dynamic_state_data_filtered,
+            static_data: static_state_data_filtered,
             current_state: "Brandenburg"
         }
 
@@ -118,11 +134,12 @@ class Post extends Component {
     }
 
     updateData(current_state) {
-        const new_data = filter_corona(corona_cut, current_state);
-        console.log("updated data", new_data);
-        this.setState(
-            {"data": new_data}
-        )
+        const new_dynamic_data = filter_state(dynamic_state_data_cut, current_state);
+        const new_static_data = filter_state_static(static_state_data, current_state);
+        this.setState({
+            "dynamic_data": new_dynamic_data,
+            "static_data": new_static_data
+        })
     }
 
     render() {
@@ -132,12 +149,15 @@ class Post extends Component {
                 <Container maxWidth="lg">
                     <main>
 
-                        <LChart data={this.state.data} details={mpost_details}/>
-                        <LChart data={this.state.data} details={google_details}/>
-
-                        <Typography variant="h6" gutterBottom>
+                        <Typography variant="h5" gutterBottom>
                             Current State: {this.state.current_state}
                         </Typography>
+
+                        <LChart data={this.state.dynamic_data} details={mpost_details}/>
+                        <LChart data={this.state.dynamic_data} details={google_details}/>
+
+                        <ValueCard data={this.state.static_data} />
+
                         <FormControl>
                             <InputLabel id="demo-simple-select-label">Select Country</InputLabel>
                                 <Select

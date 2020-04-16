@@ -24,7 +24,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            view:"blog"
+            view:"second"
         }
 
         // funcitions for ui updates
